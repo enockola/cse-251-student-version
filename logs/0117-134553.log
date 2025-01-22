@@ -1,0 +1,6 @@
+13:45:53| Starting to retrieve data from the server
+13:45:55| Title : <Request_thread(Thread-3, initial)>
+13:45:55| Director : <Request_thread(Thread-4, initial)>
+13:45:55| Producer : <Request_thread(Thread-5, initial)>
+13:45:55| Total Time To complete = 2.01381870
+13:45:55| There were 0 calls to the server

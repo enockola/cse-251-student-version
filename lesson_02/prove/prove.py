@@ -2,8 +2,8 @@
 Course: CSE 251 
 Lesson: L02 Prove
 File:   prove.py
-Author: <Add name here>
-
+Author: Enoch Olayemi
+Justification: I met all requirements for the project - 4
 Purpose: Retrieve Star Wars details from a server
 
 Instructions:
@@ -61,21 +61,118 @@ call_count = 0
 
 
 # TODO Add your threaded class definition here
+class Request_thread(threading.Thread):
+    # TODO - Add code to make an API call and return the results
+    # https://realpython.com/python-requests/
+
+    def __init__(self, url):
+        # Call the Thread class's init function
+        # threading.Thread.__init__(self)
+        super().__init__()
+        self.url = url
+        self.response = {}
+        self.status_code = 0
+
+    def run(self):
+        global call_count
+        response = requests.get(self.url)
+        call_count += 1
+        # Check the status code to see if the request succeeded.
+        self.status_code = response.status_code
+        if response.status_code == 200:
+            self.response = response.json()
+        else:
+            print('RESPONSE = ', response.status_code)
 
 
 # TODO Add any functions you need here
+def request_and_sort(items):
+    request_threads = []
+    result_list = []
+
+    for item in items:
+        thread = Request_thread(rf"{item}")
+        request_threads.append(thread)
+
+    for thread in request_threads:
+        thread.start()
+
+    for thread in request_threads:
+        thread.join()
+        result_list.append(thread.response["name"])
+
+    result_list.sort()
+
+    return result_list
+
+def characterRequest(characters):
+    return request_and_sort(characters)
+
+def planetRequest(planets):
+    return request_and_sort(planets)
+
+def starshipRequest(starships):
+    return request_and_sort(starships)
+
+def vehicleRequest(vehicles):
+    return request_and_sort(vehicles)
+
+def specieRequest(species):
+    return request_and_sort(species)
 
 
 def main():
     log = Log(show_terminal=True)
     log.start_timer('Starting to retrieve data from the server')
+    log.write("-----------------------------------------")
+    
 
-    # TODO Retrieve Top API urls
+    # TODO Retrieve Top API 
+    topAPI = Request_thread(rf"{TOP_API_URL}")
+    topAPI.start()
+    topAPI.join()
+    # print(topAPI.response) # Requests a dictionary of api-links which include the films api that we need.
 
     # TODO Retrieve Details on film 6
+    films = topAPI.response["films"] # Since its a dictionary, we use the key to get the api-link for films
+    filmAPI = Request_thread(rf"{films}6") # request the film 6 api specifically.
+    filmAPI.start()
+    filmAPI.join()
+    # print(filmAPI.response)
+
+    # Use the key from the film api to get its datails.
+    title = filmAPI.response["title"]
+    director = filmAPI.response["director"]
+    producer = filmAPI.response["producer"]
+    released = filmAPI.response["release_date"]
+    characters =  filmAPI.response["characters"]
+    planets = filmAPI.response["planets"]
+    starships = filmAPI.response["starships"]
+    vehicles = filmAPI.response["vehicles"]
+    species =  filmAPI.response["species"]
+
 
     # TODO Display results
-
+    log.write(f"Title   : {title}")
+    log.write(f"Director: {director}")
+    log.write(f"Producer: {producer}")
+    log.write(f"Released: {released}")
+    log.write("")
+    log.write(f"Characters: {len(characters)}")
+    log.write(f"{', '.join(characterRequest(characters))}")
+    log.write("")
+    log.write(f"Planets: {len(planets)}")
+    log.write(f"{', '.join(planetRequest(planets))}")
+    log.write("")
+    log.write(f"Starships: {len(starships)}")
+    log.write(f"{', '.join(starshipRequest(starships))}")
+    log.write("")
+    log.write(f"Vehicles: {len(vehicles)}")
+    log.write(f"{', '.join(vehicleRequest(vehicles))}")
+    log.write("")
+    log.write(f"Species: {len(species)}")
+    log.write(f"{', '.join(specieRequest(species))}")
+    log.write("")
     log.stop_timer('Total Time To complete')
     log.write(f'There were {call_count} calls to the server')
     

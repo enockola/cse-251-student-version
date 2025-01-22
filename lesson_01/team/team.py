@@ -23,25 +23,42 @@ from cse251 import *
 prime_count = 0
 numbers_processed = 0
 
-def is_prime(n):
-    global numbers_processed
-    numbers_processed += 1
+class Worker(threading.Thread):
 
-    """
-    Primality test using 6k+-1 optimization.
-    From: https://en.wikipedia.org/wiki/Primality_test
-    """
+    def __init__(self, start_range, range):
+       
+        threading.Thread.__init__(self)
+        self.prime_count = 0
+        self.numbers_processed = 0
+        self.start_range = start_range
+        self.range = range
+    
+    def run(self):
+        for i in range(start, start + range_count):
+            if is_prime(i):
+                prime_count += 1
+                print(i, end=', ', flush=True)
+            print(flush=True)
 
-    if n <= 3:
-        return n > 1
-    if n % 2 == 0 or n % 3 == 0:
-        return False
-    i = 5
-    while i ** 2 <= n:
-        if n % i == 0 or n % (i + 2) == 0:
+    def is_prime(n):
+        global numbers_processed
+        numbers_processed += 1
+
+        """
+        Primality test using 6k+-1 optimization.
+        From: https://en.wikipedia.org/wiki/Primality_test
+        """
+
+        if n <= 3:
+            return n > 1
+        if n % 2 == 0 or n % 3 == 0:
             return False
-        i += 6
-    return True
+        i = 5
+        while i ** 2 <= n:
+            if n % i == 0 or n % (i + 2) == 0:
+                return False
+            i += 6
+        return True
 
 
 if __name__ == '__main__':
@@ -56,11 +73,11 @@ if __name__ == '__main__':
 
     start = 10000000000
     range_count = 100000
-    for i in range(start, start + range_count):
-        if is_prime(i):
-            prime_count += 1
-            print(i, end=', ', flush=True)
-    print(flush=True)
+
+
+ 
+
+    worker = Worker(start, start_range, range)
 
     # Should find 4306 primes
     log.write(f'Numbers processed = {numbers_processed}')
